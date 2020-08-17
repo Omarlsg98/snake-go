@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -15,9 +16,19 @@ type Server struct {
 	db *gorm.DB
 }
 
-//Prueba modulos
-func Prueba() {
-	fmt.Println("Funciona!!!")
+// Page is a struct to handle html files
+type Page struct {
+	Title string
+	Body  []byte
+}
+
+func loadPage(title string) (*Page, error) {
+	filename := title + ".html"
+	body, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	return &Page{Title: title, Body: body}, nil
 }
 
 // NewServer creates a new instance of a Server.
@@ -28,6 +39,8 @@ func NewServer(db *gorm.DB) *Server {
 // RegisterRouter registers a router onto the Server.
 func (s *Server) RegisterRouter(router chi.Router) {
 	router.Route("/snake", func(router chi.Router) {
+		router.Get("/", s.getGame)
+
 		router.Get("/player", s.getPlayers)
 		router.Post("/player", s.addPlayer)
 
@@ -35,6 +48,14 @@ func (s *Server) RegisterRouter(router chi.Router) {
 		//router.Get("/score/{username}", s.getUserScores)
 		router.Post("/score/{username}", s.addScore)
 	})
+}
+
+func (s *Server) getGame(w http.ResponseWriter, r *http.Request) {
+	if page, err := loadPage("index"); err != nil {
+		http.Error(w, err.Error(), errToStatusCode(err))
+	} else {
+		fmt.Fprintf(w, "%s", page.Body)
+	}
 }
 
 func (s *Server) getPlayers(w http.ResponseWriter, r *http.Request) {

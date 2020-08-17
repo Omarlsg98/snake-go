@@ -19,7 +19,7 @@ var (
 func main() {
 	fmt.Println("Starting...")
 	flag.Parse()
-	Prueba()
+
 	db := setupDB(*addr)
 	defer db.Close()
 
