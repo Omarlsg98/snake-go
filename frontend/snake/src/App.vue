@@ -11,7 +11,7 @@
           <router-link to="/">Home</router-link>
         </v-btn>
         <v-btn flat>
-          <router-link to="/about">About</router-link>
+          <router-link to="/scores">Scores</router-link>
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>

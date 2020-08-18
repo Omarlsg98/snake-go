@@ -111,32 +111,32 @@ function create(scene) {
                         break;
                 }
                 this.currentObstacleType = obstacleType;
-                for (let x = 0; x < boardWidth; x++) {
-                    for (let y = 0; y < boardHeight; y++) {
+                for (let bx = 0; bx < boardWidth; bx++) {
+                    for (let by = 0; by < boardHeight; by++) {
                         let createPart = false;
                         switch (obstacleType) {
                             //Generate walls
                             case 0:
-                                createPart = (x == 0 || y == 0 || x == boardWidth - 1 || y == boardHeight - 1);
+                                createPart = (bx == 0 || by == 0 ||bx == boardWidth - 1 || by == boardHeight - 1);
                                 break;
                             case 1:
-                                createPart = (x == boardHeight - y) || (boardWidth - x == boardHeight - y);
+                                createPart = (bx == boardHeight - by) || (boardWidth -bx == boardHeight - by);
                                 break;
                             case 2:
-                                createPart = (x == y) || (boardWidth - x == y);
+                                createPart = (bx == by) || (boardWidth -bx == by);
                                 break;
                             case 3:
-                                createPart = (x == Math.floor(boardWidth / 2) || y == Math.floor(boardHeight / 2));
+                                createPart = (bx == Math.floor(boardWidth / 2) || by == Math.floor(boardHeight / 2));
                                 break;
                             case 4:
-                                createPart = (y == Math.floor(boardHeight * (3 / 4)) || y == Math.floor(boardHeight * (1 / 4)))
-                                    && x > Math.floor(boardWidth * (1 / 7)) && x < Math.floor(boardWidth * (6 / 7));
+                                createPart = (by == Math.floor(boardHeight * (3 / 4)) || by == Math.floor(boardHeight * (1 / 4)))
+                                    && bx > Math.floor(boardWidth * (1 / 7)) && bx < Math.floor(boardWidth * (6 / 7));
                                 break;
                             default:
                             // code block
                         }
                         if (createPart)
-                            this.addPart(x, y);
+                            this.addPart(bx, by);
                     }
                 }
             },
@@ -420,10 +420,10 @@ function getValidLocations() {
     //  A Grid we'll use to know where we can put the new piece
     var testGrid = [];
 
-    for (var y = 0; y < boardHeight; y++) {
+    for (let y = 0; y < boardHeight; y++) {
         testGrid[y] = [];
 
-        for (var x = 0; x < boardWidth; x++) {
+        for (let x = 0; x < boardWidth; x++) {
             testGrid[y][x] = true;
         }
     }
@@ -441,8 +441,8 @@ function getValidLocations() {
     //  Purge out false positions
     var validLocations = [];
 
-    for (var y = 0; y < boardHeight; y++) {
-        for (var x = 0; x < boardWidth; x++) {
+    for (let y = 0; y < boardHeight; y++) {
+        for (let x = 0; x < boardWidth; x++) {
             if (testGrid[y][x] === true) {
                 //  Is this position valid for food? If so, add it here ...
                 validLocations.push({ x: x, y: y });

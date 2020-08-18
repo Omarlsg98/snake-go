@@ -7,7 +7,7 @@ type Player struct {
 	ID        uint `gorm:"primary_key"`
 	CreatedAt time.Time
 	UserName  string  `gorm:"unique;not null"`
-	Scores    []Score `gorm:"foreignkey:UserID"`
+	Scores    []Score 
 }
 
 // Score is a model in the "scores" table.
@@ -15,7 +15,7 @@ type Score struct {
 	ID        uint `gorm:"primary_key"`
 	CreatedAt time.Time
 	Score     int `gorm:"not null"`
-	UserID    uint
+	UserName    string `gorm:"not null"`
 }
 
 /*

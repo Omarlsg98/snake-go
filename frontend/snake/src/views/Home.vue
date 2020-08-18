@@ -1,7 +1,5 @@
 <template>
-  <v-app id="inspire">
-    <v-main>
-      <v-container
+     <v-container
         class="fill-height"
         fluid
       >
@@ -58,8 +56,6 @@
           </v-col>
         </v-row>
       </v-container>
-    </v-main>
-  </v-app>
 </template>
 
 <script>
@@ -69,3 +65,13 @@
     },
   }
 </script>
+
+<style lang="scss">
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+</style>
