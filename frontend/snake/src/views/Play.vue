@@ -1,5 +1,5 @@
 <template>
-  <Game />
+  <Game :username="username"/>
 </template>
 
 
@@ -7,7 +7,8 @@
 import Game from '@/components/Game.vue'
 export default {
   name: 'play',
-  components: { Game }
+  components: { Game },
+  props: ["username"]
 }
 </script>
 

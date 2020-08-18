@@ -38,7 +38,7 @@ func (s *Server) RegisterRouter(router chi.Router) {
 
 		router.Get("/score", s.getScores)
 		//router.Get("/score/{username}", s.getUserScores)
-		router.Post("/score/{username}", s.addScore)
+		router.Post("/score", s.addScore)
 	})
 }
 
@@ -61,13 +61,6 @@ func (s *Server) getScores(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) addScore(w http.ResponseWriter, r *http.Request) {
-	username := chi.URLParam(r, "username")
-
-	var player model.Player
-	if err := s.db.Where("user_name = ?", username).First(&player).Error; err != nil {
-		http.Error(w, err.Error(), errToStatusCode(err))
-		return
-	}
 
 	var score model.Score
 	if err := json.NewDecoder(r.Body).Decode(&score); err != nil {
@@ -75,11 +68,10 @@ func (s *Server) addScore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if score.Score == 0 || username == "" {
+	if score.Score == 0 || score.UserName == "" {
 		http.Error(w, http.StatusText(400), 400)
 		return
 	}
-	score.UserID = player.ID
 
 	if err := s.db.Create(&score).Error; err != nil {
 		http.Error(w, err.Error(), errToStatusCode(err))
@@ -109,12 +101,6 @@ func (s *Server) addPlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func writeJSONResult(w http.ResponseWriter, res interface{}) {
-	/*
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8082")
-		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-	*/
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		panic(err)

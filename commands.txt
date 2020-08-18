@@ -2,5 +2,7 @@ To initialize DB
  cd /c/Users/omarleonardo/Downloads/cockroach-v20.1.4.windows-6.2-amd64/cockroach-v20.1.4.windows-6.2-amd64/
 ./cockroach.exe start-single-node --insecure --listen-addr=localhost:26257 --http-addr=localhost:8081
 
+./cockroach.exe sql --insecure 
+
 To initialize API
 go run *.go

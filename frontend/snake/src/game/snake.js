@@ -8,9 +8,13 @@ var boardHeight = 30;
 var boardWidth = 60;
 var initialSpeed = 50;
 var scoreSendit= false;
+var userName="--";
+var Score;
 
-function launch(containerId) {
-    //type: Phaser.WEBGL,
+function launch(containerId,user,score) {
+    userName=user;
+    Score=score;
+    scoreSendit= false;
     return new Phaser.Game({
         type: Phaser.AUTO,
         width: squareSize * boardWidth,
@@ -54,6 +58,7 @@ function create(scene) {
         eat:
             function () {
                 this.total++;
+                Score.t=this.total;
             }
     });
 
@@ -296,7 +301,7 @@ function create(scene) {
                     if (this.speed > 10 && food.total % 5 === 0) {
                         this.speed -= 5;
                     }
-                    if (food.total % 2 === 0) {
+                    if (food.total % 10 === 0) {
                         obstacle.changeStructure();
                     }
                     return true;
@@ -342,7 +347,7 @@ function create(scene) {
 function update(time) {
     if (!snake.alive) {
         if(!scoreSendit)
-            postNewScore("Olsg98", food.total);
+            postNewScore(userName, food.total);
         return;
     }
     /**
@@ -384,7 +389,7 @@ function update(time) {
 * to filter those out of the possible food locations.
 * If there aren't any locations left, they've won!
 *
-* @method repositionFood
+* @method repositionFoodstuff
 * @parameter {boolean} isGreenApple: true if we are trying to cahnge the position of a Green Apple (food)
 * @return {boolean} true if the food was placed, otherwise false
 */
@@ -410,7 +415,7 @@ function repositionFoodstuff(isGreenApple) {
 
 
 /**
-* @method repositionFood
+* @method getValidLocations
 * @return {x,y}array with the valid positions to spawn new objects
 */
 function getValidLocations() {
@@ -454,10 +459,11 @@ function getValidLocations() {
 
 function postNewScore(userName, score) {
     var data = {
-        Score: score
+        Score: score,
+        UserName:userName
     }
     axios({ method: "POST", 
-            url: "http://127.0.0.1:6543/snake/score/"+userName, 
+            url: "http://127.0.0.1:6543/snake/score", 
             data: data, 
             headers: {
                 "content-type": "application/json",
@@ -473,7 +479,9 @@ function postNewScore(userName, score) {
     scoreSendit=true;
 }
 
-
+function getScore(){
+    return food.total;
+}
 
 export default launch;
-export { launch, create, update }
+export { launch, create, update,getScore }
