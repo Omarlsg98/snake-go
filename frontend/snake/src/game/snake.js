@@ -1,18 +1,20 @@
 import Phaser from 'phaser'
 import BootScene from './scenes/BootScene'
 import PlayScene from './scenes/PlayScene'
+import axios from 'axios';
 
-var squareSize=16;
-var boardHeight=30;
-var boardWidth=60;
-var initialSpeed=50;
+var squareSize = 16;
+var boardHeight = 30;
+var boardWidth = 60;
+var initialSpeed = 50;
+var scoreSendit= false;
 
 function launch(containerId) {
     //type: Phaser.WEBGL,
     return new Phaser.Game({
         type: Phaser.AUTO,
-        width: squareSize*boardWidth,
-        height: squareSize*boardHeight,
+        width: squareSize * boardWidth,
+        height: squareSize * boardHeight,
         backgroundColor: '#C9FFAC',
         parent: containerId,
         scene: [BootScene, PlayScene]
@@ -34,7 +36,7 @@ var RIGHT = 3;
 
 function create(scene) {
     var Food = new Phaser.Class({
-        Extends: 
+        Extends:
             Phaser.GameObjects.Image,
         initialize:
             function Food(scene, x, y) {
@@ -52,11 +54,11 @@ function create(scene) {
         eat:
             function () {
                 this.total++;
-        }
+            }
     });
 
     var Poison = new Phaser.Class({
-        Extends: 
+        Extends:
             Phaser.GameObjects.Image,
         initialize:
             function Poison(scene, x, y) {
@@ -66,85 +68,85 @@ function create(scene) {
                 this.setTintFill(0xff0000);
                 this.setPosition(x * squareSize, y * squareSize);
                 this.setOrigin(0);
-                this.timeToAppear=1000;//15000;
-                this.timeToPerish=5000;
-                this.timeOfLastEvent=0;
+                this.timeToAppear = 1000;//15000;
+                this.timeToPerish = 5000;
+                this.timeOfLastEvent = 0;
                 scene.children.add(this);
             },
         dissapear:
             function (time) {
-                this.timeOfLastEvent=time;
-                this.setPosition(-1*squareSize,-1*squareSize);
-        },
+                this.timeOfLastEvent = time;
+                this.setPosition(-1 * squareSize, -1 * squareSize);
+            },
         cycle:
-            function(time){
-            //Spawn or despawn the poison if the time has past
-            //if the poison is not in the board
-            if(this.x<0){
-                if(time>=(this.timeToAppear+this.timeOfLastEvent)){
-                    this.timeOfLastEvent=time;
-                    repositionFoodstuff(false);
-                }
-            }else{
-                if(time>=(this.timeToPerish+this.timeOfLastEvent)){
-                    this.dissapear(time);
+            function (time) {
+                //Spawn or despawn the poison if the time has past
+                //if the poison is not in the board
+                if (this.x < 0) {
+                    if (time >= (this.timeToAppear + this.timeOfLastEvent)) {
+                        this.timeOfLastEvent = time;
+                        repositionFoodstuff(false);
+                    }
+                } else {
+                    if (time >= (this.timeToPerish + this.timeOfLastEvent)) {
+                        this.dissapear(time);
+                    }
                 }
             }
-        }
     });
-        var Obstacle = new Phaser.Class({
+    var Obstacle = new Phaser.Class({
         initialize:
             function Obstacle(scene) {
                 this.parts = scene.add.group();
-                this.currentObstacleType=-1;
-        },
+                this.currentObstacleType = -1;
+            },
         changeStructure:
-            function (){
+            function () {
                 //reset obstacles
-                this.parts.clear(true,true);
-                var obstacleType=-2;
-                while(true){
-                    obstacleType= Math.floor(Math.random() * 5); //entre 0 y *n
-                    if(this.currentObstacleType!=obstacleType)
+                this.parts.clear(true, true);
+                var obstacleType = -2;
+                while (true) {
+                    obstacleType = Math.floor(Math.random() * 5); //entre 0 y *n
+                    if (this.currentObstacleType != obstacleType)
                         break;
                 }
-                this.currentObstacleType=obstacleType;
+                this.currentObstacleType = obstacleType;
                 for (let x = 0; x < boardWidth; x++) {
                     for (let y = 0; y < boardHeight; y++) {
-                        let createPart=false;
-                        switch(obstacleType) {
+                        let createPart = false;
+                        switch (obstacleType) {
                             //Generate walls
-                            case 0:         
-                                createPart= (x==0 || y==0 || x==boardWidth-1 || y==boardHeight-1);
+                            case 0:
+                                createPart = (x == 0 || y == 0 || x == boardWidth - 1 || y == boardHeight - 1);
                                 break;
-                            case 1:         
-                                createPart= (x==boardHeight-y) || (boardWidth-x==boardHeight-y);
+                            case 1:
+                                createPart = (x == boardHeight - y) || (boardWidth - x == boardHeight - y);
                                 break;
-                            case 2:         
-                                createPart= (x==y) || (boardWidth-x==y);
+                            case 2:
+                                createPart = (x == y) || (boardWidth - x == y);
                                 break;
-                            case 3:         
-                                createPart= (x==Math.floor(boardWidth/2) || y==Math.floor(boardHeight/2));
+                            case 3:
+                                createPart = (x == Math.floor(boardWidth / 2) || y == Math.floor(boardHeight / 2));
                                 break;
-                            case 4:         
-                                createPart= (y==Math.floor(boardHeight*(3/4)) || y==Math.floor(boardHeight*(1/4)))
-                                            && x>Math.floor(boardWidth*(1/7)) && x<Math.floor(boardWidth*(6/7));
-                                break;             
+                            case 4:
+                                createPart = (y == Math.floor(boardHeight * (3 / 4)) || y == Math.floor(boardHeight * (1 / 4)))
+                                    && x > Math.floor(boardWidth * (1 / 7)) && x < Math.floor(boardWidth * (6 / 7));
+                                break;
                             default:
-                                // code block
+                            // code block
                         }
-                        if(createPart)
-                            this.addPart(x,y);
+                        if (createPart)
+                            this.addPart(x, y);
                     }
-                }                     
+                }
             },
-        addPart: 
-            function (x,y) {
+        addPart:
+            function (x, y) {
                 var newPart = this.parts.create(x * squareSize, y * squareSize, 'body');
                 newPart.setOrigin(0);
                 newPart.setTintFill(0x17202A);
-        },
-        checkGrid: 
+            },
+        checkGrid:
             function (grid) {
                 //  Remove all body pieces from valid positions list
                 this.parts.children.each(function (segment) {
@@ -155,8 +157,8 @@ function create(scene) {
                     grid[by][bx] = false;
                 });
                 return grid;
-        }
-        });
+            }
+    });
 
 
     var Snake = new Phaser.Class({
@@ -259,36 +261,34 @@ function create(scene) {
             }
         },
         dead:
-            function(){
-                console.log('dead');
-
+            function () {
                 this.alive = false;
             },
-        grow: 
+        grow:
             function () {
                 var newPart = this.body.create(this.tail.x, this.tail.y, 'body');
 
                 newPart.setOrigin(0);
-        },
-        degrow: 
+            },
+        degrow:
             function () {
-                this.body.getLast(true,true).destroy();
-                this.body.getLast(true,true).destroy()
-                if(this.body.getLast(true)== null){
+                this.body.getLast(true, true).destroy();
+                this.body.getLast(true, true).destroy()
+                if (this.body.getLast(true) == null) {
                     this.dead();
                 }
-        },
-        collideWithObstacle: 
+            },
+        collideWithObstacle:
             function (obstacle) {
                 var hitBody = Phaser.Actions.GetFirst(obstacle.parts.getChildren(), { x: this.head.x, y: this.head.y });
                 if (hitBody) {
                     this.dead();
                     return true;
                 }
-                    return false;
-        },
-        collideWithFood: 
-            function (food,obstacle) {
+                return false;
+            },
+        collideWithFood:
+            function (food, obstacle) {
                 if (this.head.x === food.x && this.head.y === food.y) {
                     this.grow();
                     food.eat();
@@ -296,7 +296,7 @@ function create(scene) {
                     if (this.speed > 10 && food.total % 5 === 0) {
                         this.speed -= 5;
                     }
-                    if (food.total % 2 === 0){
+                    if (food.total % 2 === 0) {
                         obstacle.changeStructure();
                     }
                     return true;
@@ -304,9 +304,9 @@ function create(scene) {
                 else {
                     return false;
                 }
-        },
-        collideWithPoison: 
-            function (poison,time) {
+            },
+        collideWithPoison:
+            function (poison, time) {
                 if (this.head.x === poison.x && this.head.y === poison.y) {
                     this.degrow();
                     poison.dissapear(time);
@@ -315,8 +315,8 @@ function create(scene) {
                 else {
                     return false;
                 }
-        },
-        checkGrid: 
+            },
+        checkGrid:
             function (grid) {
                 //  Remove all body pieces from valid positions list
                 this.body.children.each(function (segment) {
@@ -327,12 +327,12 @@ function create(scene) {
                     grid[by][bx] = false;
                 });
                 return grid;
-        }
+            }
     });
 
     food = new Food(scene, 3, 4);
     snake = new Snake(scene, 8, 8);
-    poison= new Poison(scene,-1,-1);
+    poison = new Poison(scene, -1, -1);
     obstacle = new Obstacle(scene);
 
     //  Create our keyboard controls
@@ -341,6 +341,8 @@ function create(scene) {
 
 function update(time) {
     if (!snake.alive) {
+        if(!scoreSendit)
+            postNewScore("Olsg98", food.total);
         return;
     }
     /**
@@ -365,13 +367,13 @@ function update(time) {
 
     if (snake.update(time)) {
         //  If the snake updated, we need to check for collisions
-        if (snake.collideWithObstacle(obstacle)){
+        if (snake.collideWithObstacle(obstacle)) {
             //dead
-        } else if (snake.collideWithFood(food,obstacle)) {
+        } else if (snake.collideWithFood(food, obstacle)) {
             repositionFoodstuff(true);
-        }else if (snake.collideWithPoison(poison,time)){
+        } else if (snake.collideWithPoison(poison, time)) {
             //Animation (?)
-        } 
+        }
     }
     poison.cycle(time);
 }
@@ -387,15 +389,15 @@ function update(time) {
 * @return {boolean} true if the food was placed, otherwise false
 */
 function repositionFoodstuff(isGreenApple) {
-    var validLocations= getValidLocations();
+    var validLocations = getValidLocations();
     if (validLocations.length > 0) {
         //  Use the RNG to pick a random food position
         var pos = Phaser.Math.RND.pick(validLocations);
 
         //  And place it
-        if(isGreenApple){
+        if (isGreenApple) {
             food.setPosition(pos.x * squareSize, pos.y * squareSize);
-        }else{
+        } else {
             poison.setPosition(pos.x * squareSize, pos.y * squareSize);
         }
 
@@ -407,11 +409,11 @@ function repositionFoodstuff(isGreenApple) {
 }
 
 
-    /**
+/**
 * @method repositionFood
 * @return {x,y}array with the valid positions to spawn new objects
 */
-function getValidLocations(){
+function getValidLocations() {
     //  First create an array that assumes all positions
     //  are valid for the new piece
 
@@ -426,10 +428,10 @@ function getValidLocations(){
         }
     }
     //check food location
-    testGrid[food.y/squareSize][food.x/squareSize] = false;
+    testGrid[food.y / squareSize][food.x / squareSize] = false;
     //check posion location
-    if(poison.x>0){
-        testGrid[poison.y/squareSize][poison.x/squareSize] = false;
+    if (poison.x > 0) {
+        testGrid[poison.y / squareSize][poison.x / squareSize] = false;
     }
     //check obstacles location
     obstacle.checkGrid(testGrid);
@@ -450,6 +452,28 @@ function getValidLocations(){
     return validLocations;
 }
 
+function postNewScore(userName, score) {
+    var data = {
+        Score: score
+    }
+    axios({ method: "POST", 
+            url: "http://127.0.0.1:6543/snake/score/"+userName, 
+            data: data, 
+            headers: {
+                "content-type": "application/json",
+                "accept":"application/json",
+                "origin":"http://localhost:8082"
+            } 
+        })
+        .catch(error => {
+        /*eslint-disable*/
+        console.error(error);
+        /*eslint-enable*/
+    });
+    scoreSendit=true;
+}
+
+
 
 export default launch;
-export { launch,create,update }
+export { launch, create, update }

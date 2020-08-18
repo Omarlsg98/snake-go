@@ -2,33 +2,17 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/jinzhu/gorm"
+	"snake.com/cors"
 	"snake.com/model"
 )
 
 // Server is an http server that handles REST requests.
 type Server struct {
 	db *gorm.DB
-}
-
-// Page is a struct to handle html files
-type Page struct {
-	Title string
-	Body  []byte
-}
-
-func loadPage(title string) (*Page, error) {
-	filename := title + ".html"
-	body, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	return &Page{Title: title, Body: body}, nil
 }
 
 // NewServer creates a new instance of a Server.
@@ -38,9 +22,17 @@ func NewServer(db *gorm.DB) *Server {
 
 // RegisterRouter registers a router onto the Server.
 func (s *Server) RegisterRouter(router chi.Router) {
+	router.Use(cors.Handler(cors.Options{
+		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
 	router.Route("/snake", func(router chi.Router) {
-		router.Get("/", s.getGame)
-
 		router.Get("/player", s.getPlayers)
 		router.Post("/player", s.addPlayer)
 
@@ -48,14 +40,6 @@ func (s *Server) RegisterRouter(router chi.Router) {
 		//router.Get("/score/{username}", s.getUserScores)
 		router.Post("/score/{username}", s.addScore)
 	})
-}
-
-func (s *Server) getGame(w http.ResponseWriter, r *http.Request) {
-	if page, err := loadPage("index"); err != nil {
-		http.Error(w, err.Error(), errToStatusCode(err))
-	} else {
-		fmt.Fprintf(w, "%s", page.Body)
-	}
 }
 
 func (s *Server) getPlayers(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +109,12 @@ func (s *Server) addPlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func writeJSONResult(w http.ResponseWriter, res interface{}) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	/*
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8082")
+		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	*/
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		panic(err)
