@@ -1,5 +1,5 @@
 import { Scene } from 'phaser'
-
+import { update,create } from '../snake'
 
 export default class PlayScene extends Scene {
   constructor () {
@@ -7,9 +7,10 @@ export default class PlayScene extends Scene {
   }
 
   create () {
-   
+    create(this);
   }
 
-  update () {
+  update (time) {
+      update(time);
   }
 }

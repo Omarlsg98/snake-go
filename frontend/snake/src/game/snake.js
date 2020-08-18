@@ -7,14 +7,18 @@ var boardHeight=30;
 var boardWidth=60;
 var initialSpeed=50;
 
-var config = {
-    type: Phaser.WEBGL,
-    width: squareSize*boardWidth,
-    height: squareSize*boardHeight,
-    backgroundColor: '#C9FFAC',
-    parent: containerId,
-    scene: [BootScene, PlayScene]
-};
+function launch(containerId) {
+    //type: Phaser.WEBGL,
+    return new Phaser.Game({
+        type: Phaser.AUTO,
+        width: squareSize*boardWidth,
+        height: squareSize*boardHeight,
+        backgroundColor: '#C9FFAC',
+        parent: containerId,
+        scene: [BootScene, PlayScene]
+    })
+}
+
 
 var snake;
 var food;
@@ -28,16 +32,7 @@ var DOWN = 1;
 var LEFT = 2;
 var RIGHT = 3;
 
-var game = new Phaser.Game(config);
-
-function preload() {
-    this.load.setBaseURL('http://labs.phaser.io');
-
-    this.load.image('food', 'assets/games/snake/food.png');
-    this.load.image('body', 'assets/games/snake/body.png');
-}
-
-function create() {
+function create(scene) {
     var Food = new Phaser.Class({
         Extends: 
             Phaser.GameObjects.Image,
@@ -335,16 +330,16 @@ function create() {
         }
     });
 
-    food = new Food(this, 3, 4);
-    snake = new Snake(this, 8, 8);
-    poison= new Poison(this,-1,-1);
-    obstacle = new Obstacle(this);
+    food = new Food(scene, 3, 4);
+    snake = new Snake(scene, 8, 8);
+    poison= new Poison(scene,-1,-1);
+    obstacle = new Obstacle(scene);
 
     //  Create our keyboard controls
-    cursors = this.input.keyboard.createCursorKeys();
+    cursors = scene.input.keyboard.createCursorKeys();
 }
 
-function update(time, delta) {
+function update(time) {
     if (!snake.alive) {
         return;
     }
@@ -456,5 +451,5 @@ function getValidLocations(){
 }
 
 
-export default game;
-export { game }
+export default launch;
+export { launch,create,update }
