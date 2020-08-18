@@ -1,3 +1,7 @@
+import Phaser from 'phaser'
+import BootScene from './scenes/BootScene'
+import PlayScene from './scenes/PlayScene'
+
 var squareSize=16;
 var boardHeight=30;
 var boardWidth=60;
@@ -8,13 +12,8 @@ var config = {
     width: squareSize*boardWidth,
     height: squareSize*boardHeight,
     backgroundColor: '#C9FFAC',
-    parent: 'phaser-example',
-    // canvas:,
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
+    parent: containerId,
+    scene: [BootScene, PlayScene]
 };
 
 var snake;
@@ -455,3 +454,7 @@ function getValidLocations(){
     }
     return validLocations;
 }
+
+
+export default game;
+export { game }
